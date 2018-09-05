@@ -610,6 +610,11 @@ class AuthenticatedFileHandler(IPythonHandler, web.StaticFileHandler):
 
     @web.authenticated
     def get(self, path):
+        # xuyufei add on 2018.08.20
+        filepath = os.path.join(self.settings['server_root_dir'], path)
+        if os.path.getsize(filepath) > 1024 * 1024:
+            raise web.HTTPError(590, u'File is too large to download: %s' % path)
+
         if os.path.splitext(path)[1] == '.ipynb' or self.get_argument("download", False):
             name = path.rsplit('/', 1)[-1]
             self.set_attachment_header(name)
