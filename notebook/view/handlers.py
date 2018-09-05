@@ -7,6 +7,8 @@
 from tornado import web
 from ..base.handlers import IPythonHandler, path_regex
 from ..utils import url_escape, url_path_join
+# add by xuyufei 2018.08.20
+import os
 
 class ViewHandler(IPythonHandler):
     """Render HTML files within an iframe."""
@@ -15,6 +17,11 @@ class ViewHandler(IPythonHandler):
         path = path.strip('/')
         if not self.contents_manager.file_exists(path):
             raise web.HTTPError(404, u'File does not exist: %s' % path)
+
+        # xuyufei add on 2018.08.20
+        filepath = os.path.join(self.settings['server_root_dir'], path)
+        if os.path.getsize(filepath) > 1024 * 1024:
+            raise web.HTTPError(590, u'File is too large to view it, file path: %s' % path)
 
         basename = path.rsplit('/', 1)[-1]
         file_url = url_path_join(self.base_url, 'files', url_escape(path))
