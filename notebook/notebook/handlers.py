@@ -50,6 +50,12 @@ class NotebookHandler(IPythonHandler):
             # not a notebook, redirect to files
             return FilesRedirectHandler.redirect_to_files(self, path)
         name = path.rsplit('/', 1)[-1]
+
+        # xuyufei add on 2018.08.20
+        filepath = os.path.join(self.settings['server_root_dir'], path)
+        if os.path.getsize(filepath) > 1024 * 1024:
+            raise web.HTTPError(590, u'File is too large to download: %s' % path)
+
         self.write(self.render_template('notebook.html',
             notebook_path=path,
             notebook_name=name,
