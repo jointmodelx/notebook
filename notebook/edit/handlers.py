@@ -7,6 +7,8 @@
 from tornado import web
 from ..base.handlers import IPythonHandler, path_regex
 from ..utils import url_escape
+# xuyufei add on 2018.08.20
+import os
 
 class EditorHandler(IPythonHandler):
     """Render the text editor interface."""
@@ -15,6 +17,11 @@ class EditorHandler(IPythonHandler):
         path = path.strip('/')
         if not self.contents_manager.file_exists(path):
             raise web.HTTPError(404, u'File does not exist: %s' % path)
+
+        # xuyufei add on 2018.08.20
+        filepath = os.path.join(self.settings['server_root_dir'], path)
+        if os.path.getsize(filepath) > 1024 * 1024:
+            raise web.HTTPError(590, u'File is too large to edit: %s' % path)
 
         basename = path.rsplit('/', 1)[-1]
         self.write(self.render_template('edit.html',
